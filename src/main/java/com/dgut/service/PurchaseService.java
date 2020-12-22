@@ -44,4 +44,19 @@ public interface PurchaseService extends IService<PurchaseEntity> {
      */
     public int resetContractItemListByContractId(Integer contractId, Map<Integer, Integer> purchaseItemList) throws Exception;
 
+    /**
+     * 更新采购清单信息
+     * @param purchaseEntity
+     * @return
+     */
+    public int updatePurchase(PurchaseEntity purchaseEntity) throws Exception;
+
+    /**
+     * 采购清单发货
+     * @param purchaseId
+     * @return
+     * @throws Exception
+     */
+    public int deliverPurchase(Integer purchaseId, String senderUserId) throws Exception;
+
 }

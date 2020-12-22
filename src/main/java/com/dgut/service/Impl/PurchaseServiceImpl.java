@@ -4,13 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dgut.dto.GoodsUpdateStockDTO;
 import com.dgut.entity.*;
+import com.dgut.mapper.AddressBookMapper;
 import com.dgut.mapper.GoodsMapper;
 import com.dgut.mapper.PurchaseItemMapper;
 import com.dgut.mapper.PurchaseMapper;
-import com.dgut.service.ContractItemService;
-import com.dgut.service.GoodsInService;
-import com.dgut.service.GoodsService;
-import com.dgut.service.PurchaseService;
+import com.dgut.service.*;
 import com.dgut.utils.SnowFlakeUtil;
 import com.dgut.vo.PurchaseWithItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     ContractItemService contractItemService;
     @Autowired
     GoodsInService goodsInService;
+    @Autowired
+    AddressBookMapper addressBookMapper;
+    @Autowired
+    LogisticsService logisticsService;
 
     @Override
     public PurchaseEntity savePurchase(PurchaseEntity purchaseEntity) throws Exception {
@@ -158,5 +160,52 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     // 获取采购清单携带数据项[单一数据][商品数据]
     public PurchaseWithItemVO getPurchaseWithItemByPurchaseId(Integer purchaseId) {
         return new PurchaseWithItemVO();
+    }
+    // 更新采购清单信息
+    public int updatePurchase(PurchaseEntity purchaseEntity) throws Exception {
+        PurchaseEntity purchaseEntity1 = purchaseMapper.selectById(purchaseEntity.getPurchaseId());
+        if(purchaseEntity1 == null) {
+            throw new Exception("采购清单不存在");
+        }
+        purchaseEntity.setVersion(purchaseEntity1.getVersion()-1);
+        return purchaseMapper.updateById(purchaseEntity);
+    }
+    // 采购清单发货
+    public int deliverPurchase(Integer purchaseId, String senderUserId) throws Exception {
+        PurchaseEntity purchase = this.getPurchaseEntityById(purchaseId);
+        if(purchase.getPayStatus()!=1) {
+            throw new Exception("该清单未付款");
+        }
+        if(purchase.getDeliverStatus()==1) {
+            throw new Exception("该清单已经发货，请勿重复操作");
+        }
+        String addresseeUserId = purchase.getUserId();
+        AddressBookEntity addresseeAddress = addressBookMapper.selectOne(new QueryWrapper<AddressBookEntity>().eq("user_id", addresseeUserId));
+        if(addresseeAddress == null) {
+            throw new Exception("收件人地址尚未完善");
+        }
+        AddressBookEntity senderAddress = addressBookMapper.selectOne(new QueryWrapper<AddressBookEntity>().eq("user_id", senderUserId));
+        if(senderAddress == null) {
+            throw new Exception("寄件人地址尚未完善");
+        }
+        LogisticsEntity logisticsEntity = new LogisticsEntity();
+        logisticsEntity.setLogisticsNo("logistics_" + SnowFlakeUtil.getId());
+        logisticsEntity.setAddresseeName(addresseeAddress.getName());
+        logisticsEntity.setAddresseeAddress(addresseeAddress.getCity()+addresseeAddress.getAddressDetail());
+        logisticsEntity.setAddresseePhone(addresseeAddress.getPhone());
+        logisticsEntity.setPayMode(1);
+        logisticsEntity.setCompanyName("顺丰");
+        logisticsEntity.setFee(18.00);
+        logisticsEntity.setSenderName(senderAddress.getName());
+        logisticsEntity.setSenderAddress(senderAddress.getCity()+senderAddress.getAddressDetail());
+        logisticsEntity.setSenderPhone(senderAddress.getPhone());
+        int logistics_res = logisticsService.saveLogistics(logisticsEntity);
+        if(logistics_res != 1) {
+            throw new Exception("物流信息新增异常");
+        }
+        LogisticsEntity logisticsNew = logisticsService.getLogisticsByLogisticsNo(logisticsEntity.getLogisticsNo());
+        purchase.setLogisticsId(logisticsNew.getLogisticsId());
+        purchase.setDeliverStatus(1);
+        return this.updatePurchase(purchase);
     }
 }
