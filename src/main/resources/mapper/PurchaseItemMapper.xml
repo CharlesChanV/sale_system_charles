@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dgut.mapper.PurchaseItemMapper">
+    <update id="updateListByPurchaseItemId" parameterType="java.util.ArrayList">
+        <foreach close=";" collection="list" index="index" item="item" open="" separator=";">
+            update sale_purchase_item
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.count != null">count = #{item.count},</if>
+                <if test="item.perPrice != null">per_price = #{item.perPrice},</if>
+                <if test="item.price != null">price = #{item.price},</if>
+                update_time = now(),
+                <if test="item.purchaseId != null">purchase_id = #{item.purchaseId},</if>
+                <if test="item.goodsId != null">goods_id = #{item.goodsId},</if>
+            </trim>
+            <where>purchase_item_id = #{item.purchaseItemId}</where>
+        </foreach>
+    </update>
+</mapper>

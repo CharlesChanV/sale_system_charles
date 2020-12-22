@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dgut.mapper.PurchaseMapper">
+<!--    resultType="com.dgut.vo.UserInfoVO"-->
+    <resultMap id="purchaseInfo" type="com.dgut.vo.PurchaseInfoVO">
+        <id column="purchase_id" property="purchaseId" />
+        <result column="pay_status" property="payStatus" />
+        <result column="total_price" property="totalPrice" />
+        <result column="deliver_status" property="deliverStatus" />
+        <result column="contract_id" property="contractId" />
+        <result column="logistics_id" property="logisticsId" />
+        <result column="customer_id" property="customerId" />
+        <result column="user_id" property="userId" />
+        <result column="admin_id" property="adminId" />
+        <collection property="purchaseItemList" column="purchase_id" select="selectItemByPurchaseId" />
+    </resultMap>
+
+
+    <select id="selectPageVo" resultMap="purchaseInfo">
+        SELECT * FROM sale_purchase where deleted=false
+        <if test="purchaseSearchDTO.payStatus!=null and purchaseSearchDTO.payStatus!=-1">
+            and pay_status=#{purchaseSearchDTO.payStatus}
+        </if>
+        <if test="purchaseSearchDTO.deliverStatus!=null and purchaseSearchDTO.deliverStatus!=-1">
+            and deliver_status=#{purchaseSearchDTO.deliverStatus}
+        </if>
+        <if test="purchaseSearchDTO.contractId!=null and purchaseSearchDTO.contractId!=-1">
+            and contract_id=#{purchaseSearchDTO.contractId}
+        </if>
+        <if test="purchaseSearchDTO.logisticsId!=null and purchaseSearchDTO.logisticsId!=-1">
+            and logistics_id=#{purchaseSearchDTO.logisticsId}
+        </if>
+        <if test="purchaseSearchDTO.customerId!=null and purchaseSearchDTO.customerId!=-1">
+            and customer_id=#{purchaseSearchDTO.customerId}
+        </if>
+        <if test="purchaseSearchDTO.userId!=null and purchaseSearchDTO.userId!=''">
+            and user_id=#{purchaseSearchDTO.userId}
+        </if>
+        <if test="purchaseSearchDTO.adminId!=null and purchaseSearchDTO.adminId!=-1">
+            and admin_id=#{purchaseSearchDTO.adminId}
+        </if>
+    </select>
+    <select id="selectItemByPurchaseId" parameterType="integer" resultType="com.dgut.entity.PurchaseItemEntity">
+        SELECT purchase_item_id,count,per_price,price,purchase_id,goods_id,create_time,update_time FROM sale_purchase_item where purchase_id=#{purchase_id}
+    </select>
+    <select id="selectItemByPurchaseIdPageVo" parameterType="integer" resultType="com.dgut.entity.PurchaseItemEntity">
+        SELECT purchase_item_id,count,per_price,price,purchase_id,goods_id,create_time,update_time FROM sale_purchase_item where purchase_id=#{purchase_id}
+    </select>
+
+</mapper>

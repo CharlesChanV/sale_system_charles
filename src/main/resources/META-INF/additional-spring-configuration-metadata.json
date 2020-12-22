@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "spring.jpa.resources.static-locations",
+      "type": "java.lang.String",
+      "description": "Description for spring.jpa.resources.static-locations."
+    },
+    {
+      "name": "spring.swagger.description",
+      "type": "java.lang.String",
+      "description": "Description for spring.swagger.description."
+    }
+  ] }

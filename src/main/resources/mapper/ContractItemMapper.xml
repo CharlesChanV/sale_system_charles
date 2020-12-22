@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dgut.mapper.ContractItemMapper">
+    <update id="updateListByContractItemId" parameterType="java.util.ArrayList">
+        <foreach close=";" collection="list" index="index" item="item" open="" separator=";">
+            update sale_contract_item
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.count != null">count = #{item.count},</if>
+                <if test="item.leaveCount != null">leave_count = #{item.leaveCount},</if>
+                <if test="item.perPrice != null">per_price = #{item.perPrice},</if>
+                <if test="item.price != null">price = #{item.price},</if>
+                <if test="item.contractId != null">contract_id = #{item.contractId},</if>
+                update_time = now(),
+                <if test="item.goodsId != null">goods_id = #{item.goodsId},</if>
+            </trim>
+            <where>contract_item_id = #{item.contractItemId}</where>
+        </foreach>
+    </update>
+</mapper>

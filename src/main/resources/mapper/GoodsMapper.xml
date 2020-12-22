@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dgut.mapper.GoodsMapper">
+    <update id="updateListByGoodsId" parameterType="java.util.ArrayList">
+        <foreach close=";" collection="list" index="index" item="item" open="" separator=";">
+            update sale_goods
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.name != null">name = #{item.name},</if>
+                <if test="item.description != null">description = #{item.description},</if>
+                <if test="item.perPrice != null">per_price = #{item.perPrice},</if>
+                <if test="item.stock != null">stock = #{item.stock},</if>
+                update_time = now(),
+                <if test="item.status != null">status = #{item.status},</if>
+            </trim>
+            <where>goods_id = #{item.goodsId}</where>
+        </foreach>
+    </update>
+</mapper>

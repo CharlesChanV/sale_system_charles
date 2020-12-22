@@ -1,0 +1,49 @@
+server:
+  port: 8081
+database:
+  prefix: sale_
+#spring:
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+#      naming:
+#        physical-strategy: com.dgut.config.DataBaseNamingStrategy
+#    show-sql: true
+#    open-in-view: false
+##    resources:
+##      static-locations: classpath:/static/**,classpath:/templates/
+##    session:
+##      timeout: 3600
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    url: jdbc:mysql://localhost:3306/sale_system?useUnicode=true&characterEncoding=utf8&tinyInt1isBit=false&useLegacyDatetimeCode=false&serverTimezone=GMT%2b8
+#    username: root
+#    password: root
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+#    driver-class-name: org.h2.Driver
+#    schema: classpath:db/schema-h2.sql
+#    data: classpath:db/data-h2.sql
+#    url: jdbc:h2:mem:test
+    url: jdbc:mysql://localhost:3306/sale_system?characterEncoding=utf8&serverTimezone=GMT%2b8&allowMultiQueries=true
+    username: root
+    password: root
+# mybatis-plus日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted  # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+
+# swagger配置
+swagger:
+  # 是否开启swagger
+  enabled: true
+  title: CR_接口文档
+  # 全局统一鉴权配置
+  authorization:
+    key-name: token
