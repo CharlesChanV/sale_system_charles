@@ -37,7 +37,7 @@ public class PurchaseItemEntity extends BaseEntity {
 //    @CreationTimestamp
 //    private Date createTime;
     @ApiModelProperty("采购清单ID")
-    private Integer purchaseId = -1;
+    private Integer purchaseId;
     @ApiModelProperty("商品ID")
-    private Integer goodsId = -1;
+    private Integer goodsId;
 }

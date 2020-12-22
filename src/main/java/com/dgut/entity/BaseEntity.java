@@ -19,10 +19,10 @@ import java.util.Date;
 public class BaseEntity {
     @ApiModelProperty("乐观锁version")
     @Version // 乐观锁
-    private Integer version;
+    private Integer version = 0;
     @ApiModelProperty("软删除deleted")
     @TableLogic
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @ApiModelProperty("创建时间")
     @CreationTimestamp

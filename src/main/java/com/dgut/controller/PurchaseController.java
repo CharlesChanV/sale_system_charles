@@ -1,10 +1,13 @@
 package com.dgut.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.dto.PurchaseSearchDTO;
 import com.dgut.dto.PageDTO;
+import com.dgut.entity.ContractItemEntity;
 import com.dgut.entity.PurchaseEntity;
 import com.dgut.entity.PurchaseItemEntity;
 import com.dgut.mapper.PurchaseItemMapper;
@@ -79,12 +82,15 @@ public class PurchaseController {
     }
     // TODO:待测试
     @ApiOperation(value = "采购清单信息新增[商品清单新增]")
-    @PostMapping("/purchase")
-    public Result<?> savePurchase(Integer contractId,List<PurchaseItemEntity> purchaseItemEntityList) throws Exception {
+    @PostMapping("/purchase/contract/{contractId}")
+    public Result<?> savePurchase(@PathVariable("contractId") Integer contractId, @RequestBody String json) throws Exception {
         PurchaseEntity purchaseEntity = new PurchaseEntity();
         purchaseEntity.setContractId(contractId);
         PurchaseEntity purchaseTarget = purchaseService.savePurchase(purchaseEntity);
-        return ResultUtils.success(purchaseItemService.savePurchaseItemList(purchaseTarget.getPurchaseId(), purchaseItemEntityList));
+        // 接收body中的purchaseItemList
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        List<PurchaseItemEntity> purchaseItemList = JSON.parseArray(jsonObject.getString("purchaseItemList"), PurchaseItemEntity.class);
+        return ResultUtils.success(purchaseItemService.savePurchaseItemList(purchaseTarget.getPurchaseId(), purchaseItemList));
     }
 
 }

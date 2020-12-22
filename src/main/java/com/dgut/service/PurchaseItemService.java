@@ -10,5 +10,5 @@ public interface PurchaseItemService {
 
     public int deletePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) throws Exception;
 
-    public int savePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList);
+    public int savePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) throws Exception;
 }

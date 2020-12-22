@@ -2,14 +2,13 @@ package com.dgut.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dgut.entity.ContractItemEntity;
-import com.dgut.entity.GoodsEntity;
-import com.dgut.entity.PurchaseEntity;
-import com.dgut.entity.PurchaseItemEntity;
+import com.dgut.entity.*;
 import com.dgut.mapper.ContractItemMapper;
 import com.dgut.mapper.GoodsMapper;
 import com.dgut.mapper.PurchaseItemMapper;
 import com.dgut.mapper.PurchaseMapper;
+import com.dgut.service.GoodsInService;
+import com.dgut.service.GoodsService;
 import com.dgut.service.PurchaseItemService;
 import com.dgut.service.PurchaseService;
 import com.dgut.vo.Result;
@@ -37,6 +36,12 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
 
     @Autowired
     GoodsMapper goodsMapper;
+
+    @Autowired
+    GoodsInService goodsInService;
+
+    @Autowired
+    GoodsService goodsService;
 
     public int deletePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) throws Exception {
         PurchaseEntity purchaseEntityById = purchaseService.getPurchaseEntityById(purchaseId);
@@ -127,8 +132,8 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
         }
         return 1;
     }
-
-    public int savePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) {
+    // TODO:待测试
+    public int savePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) throws Exception {
         Optional.ofNullable(purchaseMapper.selectById(purchaseId)).ifPresent(item->{
             if(item.getPayStatus()==1) {
                 throw new RuntimeException("当前清单已支付，不可进行此操作");
@@ -144,15 +149,39 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
             goodsEntityMap.put(item.getGoodsId(), item);
             return item;
         }).collect(Collectors.toList());
-        List<Object> collect1 = purchaseItemEntityList.stream().map(item -> {
+        // 缺货商品ID列表
+        List<Integer> lackGoodsIds = new ArrayList<>();
+        // 更新商品列表
+        List<GoodsEntity> goodsEntityList = new ArrayList<>();
+        List<PurchaseItemEntity> purchaseItemEntityListNew = purchaseItemEntityList.stream().map(item -> {
             if (goodsEntityMap.containsKey(item.getGoodsId())) {
                 GoodsEntity goodsEntity = goodsEntityMap.get(item.getGoodsId());
+                if(goodsEntity.getStock()<item.getCount()) {
+                    lackGoodsIds.add(goodsEntity.getGoodsId());
+                    GoodsInEntity goodsIn = new GoodsInEntity();
+                    goodsIn.setGoodsId(item.getGoodsId());
+                    goodsIn.setStatus((byte) 0);
+                    goodsIn.setCount(item.getCount()-goodsEntity.getStock());
+                    goodsIn.setRemark("自动入货");
+                    goodsInService.saveGoodsIn(goodsIn);
+                }
+                item.setPurchaseId(purchaseId);
                 item.setPerPrice(goodsEntity.getPerPrice());
+                goodsEntity.setStock(goodsEntity.getStock()-item.getCount());
+                goodsEntityList.add(goodsEntity);
 //                item.setPrice(goodsEntity.getPerPrice() * item.getCount());
+            }else{
+                throw new RuntimeException("存在已下架的商品");
             }
             return item;
         }).collect(Collectors.toList());
-        return baseMapper.insertBatch(purchaseItemEntityList);
+        if(!lackGoodsIds.isEmpty()) {
+            throw new Exception("商品货存不足,相关商品ID:"+lackGoodsIds.toString());
+        }
+        if(goodsService.updateGoodsList(goodsEntityList)>0) {
+            return baseMapper.insertBatch(purchaseItemEntityListNew);
+        }
+        throw new Exception("更新商品货存异常");
     }
 
 }
