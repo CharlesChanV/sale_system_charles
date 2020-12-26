@@ -15,5 +15,6 @@ public class GoodsInInfoVO {
     private String remark;
     private int adminId;
     private int logisticsId;
+    private String name;
     private LogisticsEntity logisticsInfo;
 }

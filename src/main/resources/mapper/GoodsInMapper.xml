@@ -13,6 +13,7 @@
         <result column="remark" property="remark" />
         <result column="admin_id" property="adminId" />
         <result column="logistics_id" property="logisticsId" />
+        <result column="name" property="name" />
         <association property="logisticsInfo" column="logistics_id" select="selectLogisticsByLogisticsId" />
     </resultMap>
     <select id="selectLogisticsByLogisticsId" resultType="com.dgut.entity.LogisticsEntity">
@@ -20,7 +21,7 @@
     </select>
 
     <select id="selectPageVo" resultMap="goodsInInfo">
-        SELECT goods_in_id,goods_id,count,status,remark,admin_id,logistics_id FROM sale_goods_in where deleted=false
+        SELECT a.goods_in_id,a.goods_id,a.count,a.status,a.remark,a.admin_id,a.logistics_id,sg.name FROM sale_goods_in a left join sale_goods sg on a.goods_id = sg.goods_id where a.deleted=false
         <if test="goodsInDTO.goodsId!=null and goodsInDTO.goodsId!=-1">
             and goods_id=#{goodsInDTO.goodsId}
         </if>

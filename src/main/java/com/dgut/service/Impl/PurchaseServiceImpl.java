@@ -27,6 +27,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     @Autowired
     GoodsService goodsService;
     @Autowired
+    ContractService contractService;
+    @Autowired
     ContractItemService contractItemService;
     @Autowired
     GoodsInService goodsInService;
@@ -175,7 +177,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
             throw new Exception("采购清单不存在");
         }
         purchaseEntity.setVersion(purchaseEntity1.getVersion()-1);
-        return purchaseMapper.updateById(purchaseEntity);
+        int res = purchaseMapper.updateById(purchaseEntity);
+        if(purchaseEntity.getDeliverStatus() == 1) {
+            contractService.checkFinishContract(purchaseEntity1.getContractId());
+        }
+        return res;
     }
     // 采购清单发货
     public int deliverPurchase(Integer purchaseId, String senderUserId) throws Exception {

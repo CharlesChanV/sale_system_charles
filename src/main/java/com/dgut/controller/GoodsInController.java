@@ -47,7 +47,7 @@ public class GoodsInController {
     }
     @ApiOperation(value = "更新进货单", httpMethod = "PUT")
     @PutMapping("/goodsIn")
-    public Result<?> updateGoodsIn(GoodsInEntity goodsInEntity) throws Exception {
+    public Result<?> updateGoodsIn(@RequestBody GoodsInEntity goodsInEntity) throws Exception {
 //        GoodsInEntity goodsInEntity1 = goodsInMapper.selectById(goodsInEntity.getGoodsInId());
 //        if(goodsInEntity1 == null) {
 //            throw new Exception("查无该进货单");
