@@ -2,8 +2,10 @@ package com.dgut.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dgut.dto.UserRegisterDTO;
-import com.dgut.entity.RoleEntity;
-import com.dgut.entity.UserEntity;
+import com.dgut.entity.*;
+import com.dgut.mapper.AdminMapper;
+import com.dgut.mapper.CustomerMapper;
+import com.dgut.mapper.SalespersonMapper;
 import com.dgut.mapper.UserMapper;
 import com.dgut.utils.ResultUtils;
 import com.dgut.vo.Result;
@@ -28,6 +30,12 @@ import java.util.stream.Collectors;
 public class CommonController extends BaseController {
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    SalespersonMapper salespersonMapper;
+    @Autowired
+    CustomerMapper customerMapper;
+    @Autowired
+    AdminMapper adminMapper;
 
     @ApiOperation(value = "用户注册")
     @PostMapping("/common/register")
@@ -54,6 +62,15 @@ public class CommonController extends BaseController {
             return item;
         }).collect(Collectors.toList());
         userWithRole.setRoles(roles);
+        if(roles.contains("ROLE_sale_person")) {
+            userWithRole.setSalespersonInfo(salespersonMapper.selectOne(new QueryWrapper<SalespersonEntity>().eq("user_id", user_id)));
+        }
+        if(roles.contains("ROLE_customer")) {
+            userWithRole.setCustomerInfo(customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("user_id", user_id)));
+        }
+        if(roles.contains("ROLE_store_admin")||roles.contains("ROLE_sale_admin")||roles.contains("ROLE_super_admin")) {
+            userWithRole.setAdminInfo(adminMapper.selectOne(new QueryWrapper<AdminEntity>().eq("user_id", user_id)));
+        }
         return ResultUtils.success(userWithRole);
     }
 

@@ -1,6 +1,9 @@
 package com.dgut.vo;
 
+import com.dgut.entity.AdminEntity;
+import com.dgut.entity.CustomerEntity;
 import com.dgut.entity.RoleEntity;
+import com.dgut.entity.SalespersonEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -16,4 +19,7 @@ public class UserRoleInfoVO {
     private String avatar;
     private List<RoleEntity> roleList;
     private List<String> roles;
+    private SalespersonEntity salespersonInfo;
+    private CustomerEntity customerInfo;
+    private AdminEntity adminInfo;
 }
