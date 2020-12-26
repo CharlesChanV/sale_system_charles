@@ -151,11 +151,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         List<ContractItemEntity> collect = contractItemListByContractId.stream().map(item -> {
             if (purchaseItemList.containsKey(item.getGoodsId())) {
                 int add_count = purchaseItemList.get(item.getGoodsId());
-                item.setLeaveCount(item.getLeaveCount() + add_count);
                 // 检测对应合同货品剩余用量是否异常
                 if(item.getLeaveCount() + add_count<0) {
-                    throw new RuntimeException(item.getContractItemId()+"该合同-商品信息存在剩余不足");
+                    throw new RuntimeException(item.getContractItemId()+"该合同-商品信息存在剩余不足"+item.getLeaveCount()+" "+add_count);
                 }
+                item.setLeaveCount(item.getLeaveCount() + add_count);
                 updateContractItemList.add(item);
             }
             return item;
@@ -178,7 +178,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         }
         purchaseEntity.setVersion(purchaseEntity1.getVersion()-1);
         int res = purchaseMapper.updateById(purchaseEntity);
-        if(purchaseEntity.getDeliverStatus() == 1) {
+        if(res>0&&purchaseEntity.getDeliverStatus() == 1) {
             contractService.checkFinishContract(purchaseEntity1.getContractId());
         }
         return res;
