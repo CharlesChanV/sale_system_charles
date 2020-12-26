@@ -33,7 +33,7 @@ public class GoodsInEntity extends BaseEntity {
     @ApiModelProperty("进货数量")
     private Integer count;
     @ApiModelProperty(value = "进货状态", notes = "0未进货1已进货")
-    @Column(name="status",columnDefinition="tinyint default 0 comment '0未进货1已进货'")
+    @Column(columnDefinition="tinyint default 0 comment '0未进货1已进货'")
     private byte status;
     @ApiModelProperty("备注")
     private String remark;

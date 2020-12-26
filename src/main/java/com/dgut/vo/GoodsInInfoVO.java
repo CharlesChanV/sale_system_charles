@@ -12,7 +12,7 @@ public class GoodsInInfoVO {
     private int goodsId;
     private int count;
     private byte status;
-    private int remark;
+    private String remark;
     private int adminId;
     private int logisticsId;
     private LogisticsEntity logisticsInfo;

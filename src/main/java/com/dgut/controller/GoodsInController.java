@@ -54,4 +54,9 @@ public class GoodsInController {
 //        }
         return ResultUtils.success(goodsInService.updateGoodsIn(goodsInEntity));
     }
+    @ApiOperation(value = "删除进货单", httpMethod = "PUT")
+    @PostMapping("/goodsIn/{goodsInId}")
+    public Result<?> deleteGoodsIn(@PathVariable("goodsInId") Integer goodsInId) throws Exception {
+        return ResultUtils.success(goodsInMapper.deleteById(goodsInId));
+    }
 }
