@@ -5,18 +5,21 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Column;
+import java.util.Date;
 import java.util.List;
 
 @Data
 public class PurchaseInfoVO {
-    private int purchaseId;
+    private Integer purchaseId;
+    private String purchaseNo;
     private byte payStatus;
-    private int totalPrice;
-    private int deliverStatus;
-    private int contractId;
-    private int logisticsId;
-    private int customerId;
-    private int userId;
-    private int adminId;
+    private Integer totalPrice;
+    private Integer deliverStatus;
+    private Integer contractId;
+    private Integer logisticsId;
+    private Integer customerId;
+    private String userId;
+    private Integer adminId;
+    private Date createTime;
     private List<PurchaseItemEntity> purchaseItemList;
 }

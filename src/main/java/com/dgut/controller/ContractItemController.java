@@ -7,11 +7,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.dto.PageDTO;
+import com.dgut.entity.ContractEntity;
 import com.dgut.entity.ContractItemEntity;
 import com.dgut.entity.PurchaseItemEntity;
 import com.dgut.mapper.ContractItemMapper;
+import com.dgut.mapper.ContractMapper;
 import com.dgut.service.ContractItemService;
 import com.dgut.utils.ResultUtils;
+import com.dgut.vo.ContractItemVO;
 import com.dgut.vo.PageResult;
 import com.dgut.vo.Result;
 import io.swagger.annotations.Api;
@@ -20,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Api(value = "合同-商品控制器", description = "合同-商品控制器")
@@ -31,11 +35,14 @@ public class ContractItemController {
     @Autowired
     ContractItemMapper contractItemMapper;
 
+    @Autowired
+    ContractMapper contractMapper;
+
     @ApiOperation(value = "合同-商品数据列表", httpMethod = "GET")
     @GetMapping("/contract/{contractId}/item")
     public PageResult getContractItemList(@PathVariable("contractId") Integer contractId, PageDTO pageDTO) {
-        IPage<ContractItemEntity> contractItemPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
-        contractItemPage = contractItemMapper.selectPage(contractItemPage,new QueryWrapper<ContractItemEntity>().eq("contract_id", contractId));
+        IPage<ContractItemVO> contractItemPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
+        contractItemPage = contractItemMapper.selectItemByContractIdPageVo(contractItemPage,contractId);
         return ResultUtils.pageResult(contractItemPage);
     }
 //TODO:完善功能并新增一个接口（批量增加合同-商品数据项）
@@ -47,7 +54,7 @@ public class ContractItemController {
         return ResultUtils.success(contractItemService.saveContractItemList(contractId, contractItemEntityList));
     }
     @ApiOperation(value = "批量修改合同-商品数据项", httpMethod = "POST")
-    @PostMapping("/contract/{contractId}/modifyItem")
+    @PutMapping("/contract/{contractId}/modifyItem")
     public Result<?> modifyContractItemList(@PathVariable("contractId") Integer contractId, @RequestBody String json) throws Exception {
         JSONObject jsonObject = JSONObject.parseObject(json);
         List<ContractItemEntity> contractItemEntityList = JSON.parseArray(jsonObject.getString("contractItemList"), ContractItemEntity.class);

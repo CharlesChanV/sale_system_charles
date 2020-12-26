@@ -19,4 +19,7 @@
             <where>contract_item_id = #{item.contractItemId}</where>
         </foreach>
     </update>
+    <select id="selectItemByContractIdPageVo" parameterType="integer" resultType="com.dgut.vo.ContractItemVO">
+        SELECT a.contract_item_id,a.goods_id,a.count,a.leave_count,a.per_price,a.contract_id,sg.name FROM sale_contract_item a left join sale_goods sg on a.goods_id = sg.goods_id where contract_id=#{contract_id} and a.deleted=0
+    </select>
 </mapper>

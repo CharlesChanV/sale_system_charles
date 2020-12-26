@@ -134,7 +134,11 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
     }
     // TODO:待测试
     public int savePurchaseItemList(Integer purchaseId, List<PurchaseItemEntity> purchaseItemEntityList) throws Exception {
-        Optional.ofNullable(purchaseMapper.selectById(purchaseId)).ifPresent(item->{
+        PurchaseEntity purchaseEntity = purchaseMapper.selectById(purchaseId);
+        if(purchaseEntity == null) {
+            throw new Exception("采购清单为空");
+        }
+        Optional.ofNullable(purchaseEntity).ifPresent(item->{
             if(item.getPayStatus()==1) {
                 throw new RuntimeException("当前清单已支付，不可进行此操作");
             }
@@ -147,15 +151,18 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
         Map<Integer, GoodsEntity> goodsEntityMap = new HashMap<>();
         List<Object> collect = goodsEntities.stream().map(item -> {
             goodsEntityMap.put(item.getGoodsId(), item);
-            return item;
+            return item.getGoodsId();
         }).collect(Collectors.toList());
         // 缺货商品ID列表
         List<Integer> lackGoodsIds = new ArrayList<>();
         // 更新商品列表
         List<GoodsEntity> goodsEntityList = new ArrayList<>();
+        // 更新商品ID-数量列表
+        Map<Integer, Integer> goodsIdCountList = new HashMap<>();
         List<PurchaseItemEntity> purchaseItemEntityListNew = purchaseItemEntityList.stream().map(item -> {
             if (goodsEntityMap.containsKey(item.getGoodsId())) {
                 GoodsEntity goodsEntity = goodsEntityMap.get(item.getGoodsId());
+                // 检查库存情况
                 if(goodsEntity.getStock()<item.getCount()) {
                     lackGoodsIds.add(goodsEntity.getGoodsId());
                     GoodsInEntity goodsIn = new GoodsInEntity();
@@ -169,6 +176,7 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
                 item.setPerPrice(goodsEntity.getPerPrice());
                 goodsEntity.setStock(goodsEntity.getStock()-item.getCount());
                 goodsEntityList.add(goodsEntity);
+                goodsIdCountList.put(item.getGoodsId(), -item.getCount());
 //                item.setPrice(goodsEntity.getPerPrice() * item.getCount());
             }else{
                 throw new RuntimeException("存在已下架的商品");
@@ -178,10 +186,10 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
         if(!lackGoodsIds.isEmpty()) {
             throw new Exception("商品货存不足,相关商品ID:"+lackGoodsIds.toString());
         }
-        if(goodsService.updateGoodsList(goodsEntityList)>0) {
+        // 若成功更新商品列表库存信息则将合同商品列表插入
+        if(goodsService.updateGoodsList(goodsEntityList)>0&&purchaseService.resetContractItemListByContractId(purchaseEntity.getContractId(), goodsIdCountList)>0) {
             return baseMapper.insertBatch(purchaseItemEntityListNew);
         }
         throw new Exception("更新商品货存异常");
     }
-
 }

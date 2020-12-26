@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.dgut.dto.PurchaseSearchDTO;
 import com.dgut.entity.PurchaseEntity;
 import com.dgut.entity.PurchaseItemEntity;
+import com.dgut.vo.PurchaseItemInfoVO;
 import com.dgut.vo.PurchaseWithItemVO;
 import com.dgut.vo.UserInfoVO;
 import org.apache.ibatis.annotations.Mapper;
@@ -18,6 +19,6 @@ import java.util.List;
 public interface PurchaseMapper extends BaseMapper<PurchaseEntity> {
     @Transactional
     IPage<PurchaseWithItemVO> selectPageVo(IPage<?> page, PurchaseSearchDTO purchaseSearchDTO);
-    List<PurchaseItemEntity> selectItemByPurchaseId(Integer purchase_id);
+    List<PurchaseItemInfoVO> selectItemByPurchaseId(Integer purchase_id);
     IPage<PurchaseItemEntity> selectItemByPurchaseIdPageVo(IPage<?> page, Integer purchase_id);
 }

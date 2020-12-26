@@ -42,9 +42,19 @@ public class CustomerController {
         return ResultUtils.pageResult(customerPage);
     }
 
+    @ApiOperation(value = "客户信息新增")
+    @PostMapping("/customer")
+    public Result<?> saveCustomer(@RequestBody CustomerEntity customerEntity) throws Exception {
+        CustomerEntity hasUserId = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("user_id", customerEntity.getUserId()));
+        if(hasUserId != null) {
+            throw new Exception("该用户已存在客户信息");
+        }
+        return ResultUtils.success(customerMapper.insert(customerEntity));
+    }
+
     @ApiOperation(value = "客户信息修改")
     @PutMapping("/customer")
-    public Result<?> updateCustomer(CustomerEntity customerEntity) throws Exception {
+    public Result<?> updateCustomer(@RequestBody CustomerEntity customerEntity) throws Exception {
         CustomerEntity customerEntity1 = customerMapper.selectById(customerEntity.getCustomerId());
         if(customerEntity1 == null) {
             throw new Exception("查无此客户信息");

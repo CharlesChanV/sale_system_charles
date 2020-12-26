@@ -42,8 +42,8 @@ public class ContractController {
         queryWrapper
                 .like("contract_name", contractDTO.getContractName()!=null?contractDTO.getContractName():"")
                 .like("first_party", contractDTO.getFirstParty()!=null?contractDTO.getFirstParty():"");
-        if(contractDTO.getSalespersonId() > 0)queryWrapper.eq("salesperson_id", contractDTO.getSalespersonId());
-        if(contractDTO.getCustomerId() > 0)queryWrapper.eq("customer_id", contractDTO.getCustomerId());
+        if(contractDTO.getSalespersonId() != null)queryWrapper.eq("salesperson_id", contractDTO.getSalespersonId());
+        if(contractDTO.getCustomerId() != null)queryWrapper.eq("customer_id", contractDTO.getCustomerId());
         IPage<ContractEntity> contractPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
         contractPage = contractMapper.selectPage(contractPage, queryWrapper);
         return ResultUtils.pageResult(contractPage);
@@ -51,7 +51,7 @@ public class ContractController {
 
     @ApiOperation(value = "合同添加[单一数据]", httpMethod = "POST")
     @PostMapping("/contract")
-    public Result<?> saveContract(ContractEntity contractEntity) {
+    public Result<?> saveContract(@RequestBody ContractEntity contractEntity) {
         return ResultUtils.success(contractService.saveContract(contractEntity));
     }
 
@@ -68,7 +68,11 @@ public class ContractController {
 
     @ApiOperation(value = "合同信息删除")
     @PostMapping("/contract/{contractId}")
-    public Result<?> deleteContract(@PathVariable("contractId") Integer contractId) {
+    public Result<?> deleteContract(@PathVariable("contractId") Integer contractId) throws Exception {
+        ContractEntity contract = contractMapper.selectById(contractId);
+        if(contract.getStatus()>0) {
+            throw new Exception("当前合同状态不允许的删除");
+        }
         return ResultUtils.success(contractMapper.deleteById(contractId));
     }
 

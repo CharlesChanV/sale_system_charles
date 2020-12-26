@@ -98,6 +98,9 @@ public class PurchaseController {
         if(contractEntity == null) {
             throw new Exception("合同不存在");
         }
+        if(contractEntity.getStatus() != 1) {
+            throw new Exception("该合同所处状态无法进行此操作");
+        }
         PurchaseEntity purchaseEntity = new PurchaseEntity();
         purchaseEntity.setContractId(contractId);
         purchaseEntity.setCustomerId(contractEntity.getCustomerId());

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dgut.dto.PageDTO;
 import com.dgut.dto.SalespersonDTO;
+import com.dgut.entity.CustomerEntity;
 import com.dgut.entity.LogisticsEntity;
 import com.dgut.entity.SalespersonEntity;
 import com.dgut.mapper.SalespersonMapper;
@@ -42,9 +43,19 @@ public class SalespersonController {
         return ResultUtils.pageResult(salespersonPage);
     }
 
+    @ApiOperation(value = "销售人员信息新增")
+    @PostMapping("/salesperson")
+    public Result<?> saveCustomer(@RequestBody SalespersonEntity salespersonEntity) throws Exception {
+        SalespersonEntity hasUserId = salespersonMapper.selectOne(new QueryWrapper<SalespersonEntity>().eq("user_id", salespersonEntity.getUserId()));
+        if(hasUserId != null) {
+            throw new Exception("该用户已存在销售人员信息");
+        }
+        return ResultUtils.success(salespersonMapper.insert(salespersonEntity));
+    }
+
     @ApiOperation(value = "销售人员信息修改")
     @PutMapping("/salesperson")
-    public Result<?> updateSalesperson(SalespersonEntity salespersonEntity) throws Exception {
+    public Result<?> updateSalesperson(@RequestBody SalespersonEntity salespersonEntity) throws Exception {
         SalespersonEntity salespersonEntity1 = salespersonMapper.selectById(salespersonEntity.getSalespersonId());
         if(salespersonEntity1 == null) {
             throw new Exception("查无此销售人员信息");

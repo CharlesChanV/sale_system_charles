@@ -36,6 +36,8 @@ public class UserEntity extends BaseEntity {
     private String username;
     @ApiModelProperty("用户密码")
     private String password;
+    @ApiModelProperty("用户头像")
+    private String avatar;
 //    @ApiModelProperty("角色权限")
 //    @Column(name="roles",columnDefinition="varchar(100) default 'ROLE_user' COMMENT '普通用户:ROLE_user;销售管理员:ROLE_sales_admin;仓库管理员:ROLE_store_admin'")
 //    private String roles = "ROLE_user";

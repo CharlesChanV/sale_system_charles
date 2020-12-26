@@ -74,6 +74,8 @@ public class ContractItemServiceImpl extends ServiceImpl<ContractItemMapper, Con
             if (goodsEntityMap.containsKey(item.getGoodsId())) {
                 GoodsEntity goodsEntity = goodsEntityMap.get(item.getGoodsId());
                 item.setPerPrice(goodsEntity.getPerPrice());
+                item.setLeaveCount(item.getCount());
+                item.setContractId(contractId);
 //                item.setPrice(goodsEntity.getPerPrice() * item.getCount());
             }
             return item;

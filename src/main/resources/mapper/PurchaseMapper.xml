@@ -7,6 +7,7 @@
 <!--    resultType="com.dgut.vo.UserInfoVO"-->
     <resultMap id="purchaseInfo" type="com.dgut.vo.PurchaseInfoVO">
         <id column="purchase_id" property="purchaseId" />
+        <result column="purchase_no" property="purchaseNo" />
         <result column="pay_status" property="payStatus" />
         <result column="total_price" property="totalPrice" />
         <result column="deliver_status" property="deliverStatus" />
@@ -15,6 +16,7 @@
         <result column="customer_id" property="customerId" />
         <result column="user_id" property="userId" />
         <result column="admin_id" property="adminId" />
+        <result column="create_time" property="createTime" />
         <collection property="purchaseItemList" column="purchase_id" select="selectItemByPurchaseId" />
     </resultMap>
 
@@ -43,8 +45,8 @@
             and admin_id=#{purchaseSearchDTO.adminId}
         </if>
     </select>
-    <select id="selectItemByPurchaseId" parameterType="integer" resultType="com.dgut.entity.PurchaseItemEntity">
-        SELECT purchase_item_id,count,per_price,price,purchase_id,goods_id,create_time,update_time FROM sale_purchase_item where purchase_id=#{purchase_id}
+    <select id="selectItemByPurchaseId" parameterType="integer" resultType="com.dgut.vo.PurchaseItemInfoVO">
+        SELECT a.purchase_item_id,a.count,a.per_price,a.price,a.purchase_id,a.goods_id,a.create_time,a.update_time,sg.name FROM sale_purchase_item a left join sale_goods sg on a.goods_id = sg.goods_id where purchase_id=#{purchase_id}
     </select>
     <select id="selectItemByPurchaseIdPageVo" parameterType="integer" resultType="com.dgut.entity.PurchaseItemEntity">
         SELECT purchase_item_id,count,per_price,price,purchase_id,goods_id,create_time,update_time FROM sale_purchase_item where purchase_id=#{purchase_id}

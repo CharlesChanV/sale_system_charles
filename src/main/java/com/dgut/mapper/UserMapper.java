@@ -19,7 +19,7 @@ import java.util.Map;
 @Repository
 @Mapper
 public interface UserMapper extends BaseMapper<UserEntity> {
-    public List<UserRoleInfoVO> getUserWithRoleByUserId(String user_id);
+    public UserRoleInfoVO getUserWithRoleByUserId(String user_id);
     public List<RoleEntity> selectRolesByUserId(String user_id);
     @Transactional
     IPage<UserInfoVO> selectPageVo(IPage<?> page, String username);

@@ -34,19 +34,23 @@ public class GoodsController {
     @GetMapping("/goods")
     public PageResult getGoodsList(GoodsEntity goodsEntity, PageDTO pageDTO) {
         IPage<GoodsEntity> goodsPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
-        goodsPage = goodsMapper.selectPage(goodsPage,new QueryWrapper<GoodsEntity>().like("name", goodsEntity.getName()!=null?goodsEntity.getName():""));
+        goodsPage = goodsMapper.selectPage(
+                goodsPage,new QueryWrapper<GoodsEntity>()
+                .like("name", goodsEntity.getName()!=null?goodsEntity.getName():"")
+                .like("status", goodsEntity.getStatus()!=null?goodsEntity.getStatus():"")
+        );
         return ResultUtils.pageResult(goodsPage);
     }
 
     @ApiOperation(value = "商品添加[单一数据]", httpMethod = "POST")
     @PostMapping("/goods")
-    public Result<?> saveGoods(GoodsEntity goodsEntity) {
+    public Result<?> saveGoods(@RequestBody GoodsEntity goodsEntity) {
         return ResultUtils.success(goodsMapper.insert(goodsEntity));
     }
 
     @ApiOperation(value = "商品信息修改")
     @PutMapping("/goods")
-    public Result<?> updateGoods(GoodsEntity goodsEntity) throws Exception {
+    public Result<?> updateGoods(@RequestBody GoodsEntity goodsEntity) throws Exception {
         System.out.println(goodsEntity);
         GoodsEntity goodsEntity1 = goodsMapper.selectById(goodsEntity.getGoodsId());
         if(goodsEntity1 == null) {

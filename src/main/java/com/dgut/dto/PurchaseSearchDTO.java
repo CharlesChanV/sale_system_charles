@@ -7,11 +7,11 @@ import javax.persistence.Column;
 
 @Data
 public class PurchaseSearchDTO {
-    private Byte payStatus=-1;
-    private Integer deliverStatus=-1;
-    private Integer contractId=-1;
-    private Integer logisticsId=-1;
-    private Integer customerId=-1;
+    private Byte payStatus;
+    private Integer deliverStatus;
+    private Integer contractId;
+    private Integer logisticsId;
+    private Integer customerId;
     private String userId;
-    private Integer adminId=-1;
+    private Integer adminId;
 }

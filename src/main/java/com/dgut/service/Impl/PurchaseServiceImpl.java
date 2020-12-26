@@ -69,6 +69,12 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         QueryWrapper<PurchaseItemEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("purchase_id", purchaseId).select("goods_id", "count");
         List<PurchaseItemEntity> purchaseItemEntities = purchaseItemMapper.selectList(queryWrapper);
+        if(purchaseItemEntities.isEmpty()) {
+            if(purchaseMapper.deleteById(purchaseEntity.getPurchaseId())>0) {
+                return 1;
+            }
+            throw new Exception("删除清单数据异常异常");
+        }
         Map<Integer, Integer> purchaseItemList = new HashMap<>();
         // 将根据purchase_id查询出来的PurchaseItemEntity转化为goods_id->count的键值对purchaseItemList
         List<Integer> goodIdsList = purchaseItemEntities.stream().map(item -> {

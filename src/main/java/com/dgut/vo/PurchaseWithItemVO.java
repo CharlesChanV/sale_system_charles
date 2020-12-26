@@ -26,7 +26,7 @@ public class PurchaseWithItemVO extends BaseVO {
     private int customerId;
     private int userId;
     private int adminId;
-    private List<PurchaseItemEntity> purchaseItemEntityList;
+    private List<PurchaseItemInfoVO> purchaseItemEntityList;
     public PurchaseWithItemVO() {}
     public PurchaseWithItemVO(PurchaseEntity purchaseEntity, List<PurchaseItemEntity> purchaseItemEntityList) {
         Optional.ofNullable(purchaseEntity).ifPresent(item->{

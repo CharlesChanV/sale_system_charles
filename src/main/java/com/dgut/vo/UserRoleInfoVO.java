@@ -13,6 +13,7 @@ import java.util.List;
 public class UserRoleInfoVO {
     private String userId;
     private String username;
-//    private String password;
+    private String avatar;
     private List<RoleEntity> roleList;
+    private List<String> roles;
 }
