@@ -2,6 +2,7 @@ package com.dgut.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dgut.entity.GoodsEntity;
+import com.dgut.entity.LogisticsEntity;
 import com.dgut.entity.PurchaseEntity;
 import com.dgut.entity.PurchaseItemEntity;
 
@@ -58,5 +59,13 @@ public interface PurchaseService extends IService<PurchaseEntity> {
      * @throws Exception
      */
     public int deliverPurchase(Integer purchaseId, String senderUserId) throws Exception;
+    /**
+     * 处理封装物流信息
+     * @param addresseeUserId
+     * @param senderUserId
+     * @return
+     * @throws Exception
+     */
+    public LogisticsEntity handleLogisticsInfoNew(String addresseeUserId, String senderUserId) throws Exception;
 
 }

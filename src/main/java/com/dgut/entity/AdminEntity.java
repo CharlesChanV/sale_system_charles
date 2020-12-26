@@ -36,6 +36,8 @@ public class AdminEntity extends BaseEntity {
     private String phone;
     @ApiModelProperty("管理员邮箱")
     private String email;
+    @ApiModelProperty("地址")
+    private String address;
 //    @ApiModelProperty("创建时间")
 //    @CreationTimestamp
 //    @TableField(fill = FieldFill.INSERT)

@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dgut.dto.GoodsUpdateStockDTO;
 import com.dgut.entity.*;
-import com.dgut.mapper.AddressBookMapper;
-import com.dgut.mapper.GoodsMapper;
-import com.dgut.mapper.PurchaseItemMapper;
-import com.dgut.mapper.PurchaseMapper;
+import com.dgut.mapper.*;
 import com.dgut.service.*;
 import com.dgut.utils.SnowFlakeUtil;
 import com.dgut.vo.PurchaseWithItemVO;
@@ -37,6 +34,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     AddressBookMapper addressBookMapper;
     @Autowired
     LogisticsService logisticsService;
+    @Autowired
+    CustomerMapper customerMapper;
+    @Autowired
+    AdminMapper adminMapper;
 
     @Override
     public PurchaseEntity savePurchase(PurchaseEntity purchaseEntity) throws Exception {
@@ -186,6 +187,47 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
             throw new Exception("该清单已经发货，请勿重复操作");
         }
         String addresseeUserId = purchase.getUserId();
+        LogisticsEntity logisticsEntity = this.handleLogisticsInfoNew(addresseeUserId, senderUserId);
+        int logistics_res = logisticsService.saveLogistics(logisticsEntity);
+        if(logistics_res != 1) {
+            throw new Exception("物流信息新增异常");
+        }
+        LogisticsEntity logisticsNew = logisticsService.getLogisticsByLogisticsNo(logisticsEntity.getLogisticsNo());
+        purchase.setLogisticsId(logisticsNew.getLogisticsId());
+        purchase.setDeliverStatus(1);
+        return this.updatePurchase(purchase);
+    }
+
+    /**
+     * 处理封装物流信息
+     * @param addresseeUserId
+     * @param senderUserId
+     * @return
+     * @throws Exception
+     */
+    public LogisticsEntity handleLogisticsInfoNew(String addresseeUserId, String senderUserId) throws Exception {
+        CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("user_id", addresseeUserId));
+        if(addressee == null) {
+            throw new Exception("收件人地址尚未完善");
+        }
+        AdminEntity sender = adminMapper.selectOne(new QueryWrapper<AdminEntity>().eq("user_id", senderUserId));
+        if(sender == null) {
+            throw new Exception("寄件人地址尚未完善");
+        }
+        LogisticsEntity logisticsEntity = new LogisticsEntity();
+        logisticsEntity.setLogisticsNo("logistics_" + SnowFlakeUtil.getId());
+        logisticsEntity.setAddresseeName(addressee.getName());
+        logisticsEntity.setAddresseeAddress(addressee.getAddress());
+        logisticsEntity.setAddresseePhone(addressee.getPhone());
+        logisticsEntity.setPayMode(1);
+        logisticsEntity.setCompanyName("顺丰");
+        logisticsEntity.setFee(18.00);
+        logisticsEntity.setSenderName(sender.getName());
+        logisticsEntity.setSenderAddress(sender.getAddress());
+        logisticsEntity.setSenderPhone(sender.getPhone());
+        return logisticsEntity;
+    }
+    public LogisticsEntity handleLogisticsInfo(String addresseeUserId, String senderUserId) throws Exception {
         AddressBookEntity addresseeAddress = addressBookMapper.selectOne(new QueryWrapper<AddressBookEntity>().eq("user_id", addresseeUserId));
         if(addresseeAddress == null) {
             throw new Exception("收件人地址尚未完善");
@@ -205,13 +247,6 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         logisticsEntity.setSenderName(senderAddress.getName());
         logisticsEntity.setSenderAddress(senderAddress.getCity()+senderAddress.getAddressDetail());
         logisticsEntity.setSenderPhone(senderAddress.getPhone());
-        int logistics_res = logisticsService.saveLogistics(logisticsEntity);
-        if(logistics_res != 1) {
-            throw new Exception("物流信息新增异常");
-        }
-        LogisticsEntity logisticsNew = logisticsService.getLogisticsByLogisticsNo(logisticsEntity.getLogisticsNo());
-        purchase.setLogisticsId(logisticsNew.getLogisticsId());
-        purchase.setDeliverStatus(1);
-        return this.updatePurchase(purchase);
+        return logisticsEntity;
     }
 }
