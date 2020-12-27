@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityNotFoundException;
@@ -42,7 +43,7 @@ public class AdminController extends BaseController {
 
     @ApiOperation(value = "设置用户角色")
     @PostMapping("/admin/setUserRole")
-    public Result<?> setUserRole(RoleUserEntity roleUserEntity) throws Exception {
+    public Result<?> setUserRole(@RequestBody RoleUserEntity roleUserEntity) throws Exception {
 //        System.out.println(roleUserEntity);
         QueryWrapper<RoleUserEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("role_id",roleUserEntity.getRoleId());
@@ -57,7 +58,7 @@ public class AdminController extends BaseController {
     }
     @ApiOperation(value = "删除用户角色")
     @PostMapping("/admin/deleteUserRole")
-    public Result<?> deleteUserRole(RoleUserEntity roleUserEntity) throws Exception {
+    public Result<?> deleteUserRole(@RequestBody RoleUserEntity roleUserEntity) throws Exception {
 //        System.out.println(roleUserEntity);
         QueryWrapper<RoleUserEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("role_id",roleUserEntity.getRoleId());
@@ -72,7 +73,7 @@ public class AdminController extends BaseController {
 
     @ApiOperation(value = "保存用户管理员信息[新增/更新]")
     @PostMapping("/admin/saveAdminInfo")
-    public Result<?> saveAdminInfo(AdminDto adminDto) throws Exception {
+    public Result<?> saveAdminInfo(@RequestBody AdminDto adminDto) throws Exception {
 //        System.out.println(roleUserEntity);
         QueryWrapper<AdminEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",adminDto.getUserId());
@@ -85,8 +86,4 @@ public class AdminController extends BaseController {
         newAdmin.setVersion(adminEntity.getVersion()-1);
         return ResultUtils.success(adminMapper.updateById(newAdmin));
     }
-
-
-
-
 }

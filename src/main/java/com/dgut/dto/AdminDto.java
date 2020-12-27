@@ -11,5 +11,5 @@ public class AdminDto {
     private String address;
     private Byte status = 1;
     private String userId;
-    private Byte state;
+    private Byte state = 0;
 }

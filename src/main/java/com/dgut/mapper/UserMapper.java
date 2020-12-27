@@ -22,5 +22,6 @@ public interface UserMapper extends BaseMapper<UserEntity> {
     public UserRoleInfoVO getUserWithRoleByUserId(String user_id);
     public List<RoleEntity> selectRolesByUserId(String user_id);
     @Transactional
-    IPage<UserInfoVO> selectPageVo(IPage<?> page, String username);
+//    IPage<UserInfoVO> selectPageVo(IPage<?> page, String username);
+    IPage<UserRoleInfoVO> selectPageVo(IPage<?> page, String username);
 }

@@ -34,6 +34,8 @@ public class SalespersonEntity extends BaseEntity {
     private String phone;
     @ApiModelProperty("销售人员电子邮箱")
     private String email;
+    @ApiModelProperty("地址")
+    private String address;
 //    @ApiModelProperty("创建时间")
 //    @CreationTimestamp
 //    private Date createTime;
@@ -41,7 +43,7 @@ public class SalespersonEntity extends BaseEntity {
 //    @UpdateTimestamp
 //    private Date updateTime;
     @ApiModelProperty("状态1正常0禁用")
-    @Column(name="status",columnDefinition="tinyint default 1 comment '状态1正常0禁用'")
+    @Column(columnDefinition="tinyint default 1 comment '状态1正常0禁用'")
     private Byte status;
     @ApiModelProperty("销售人员用户ID")
     private String userId;

@@ -51,7 +51,7 @@ public class AdminEntity extends BaseEntity {
     @ApiModelProperty("用户ID")
     private String userId;
     @ApiModelProperty(value = "管理员类别", notes = "0超级管理员1销售管理员2仓库管理员")
-    private byte state;
+    private Byte state;
     public AdminEntity(AdminDto adminDto){
         Optional.ofNullable(adminDto).ifPresent(item->{
             BeanUtils.copyProperties(item,this);

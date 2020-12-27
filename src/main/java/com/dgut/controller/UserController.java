@@ -13,6 +13,7 @@ import com.dgut.vo.Result;
 import com.dgut.service.Impl.UserServiceImpl;
 import com.dgut.utils.ResultUtils;
 import com.dgut.vo.UserInfoVO;
+import com.dgut.vo.UserRoleInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class UserController extends BaseController{
     @Transactional
     public PageResult getUserList(UserInfoDto userInfoDto, PageDTO pageDTO) {
         String username = userInfoDto.getUsername() != null?userInfoDto.getUsername():"";
-        IPage<UserInfoVO> userPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
+        IPage<UserRoleInfoVO> userPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
         userPage = userMapper.selectPageVo(userPage, username);
         return ResultUtils.pageResult(userPage);
     }
@@ -46,6 +47,16 @@ public class UserController extends BaseController{
     @Transactional
     public Result<?> getUserList() {
         return ResultUtils.success(userMapper.selectList(null));
+    }
+
+    @ApiOperation("更改用户密码")
+    @PostMapping("/user/changePassword")
+    public Result<?> changePassword(@RequestBody UserInfoDto userInfoDto, Authentication authentication) {
+        String user_id = (String) authentication.getPrincipal();
+        UserEntity userEntity = userMapper.selectById(user_id);
+        userEntity.setPassword(bCryptPasswordEncoder.encode(userInfoDto.getPassword()));
+        userEntity.setVersion(userEntity.getVersion()-1);
+        return ResultUtils.success(userMapper.updateById(userEntity));
     }
 
     @GetMapping("/tt")

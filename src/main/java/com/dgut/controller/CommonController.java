@@ -3,10 +3,7 @@ package com.dgut.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dgut.dto.UserRegisterDTO;
 import com.dgut.entity.*;
-import com.dgut.mapper.AdminMapper;
-import com.dgut.mapper.CustomerMapper;
-import com.dgut.mapper.SalespersonMapper;
-import com.dgut.mapper.UserMapper;
+import com.dgut.mapper.*;
 import com.dgut.utils.ResultUtils;
 import com.dgut.vo.Result;
 import com.dgut.vo.UserRoleInfoVO;
@@ -14,10 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,10 +30,12 @@ public class CommonController extends BaseController {
     CustomerMapper customerMapper;
     @Autowired
     AdminMapper adminMapper;
+    @Autowired
+    RoleUserMapper roleUserMapper;
 
     @ApiOperation(value = "用户注册")
     @PostMapping("/common/register")
-    public Result<?> register(UserRegisterDTO userRegisterDTO) {
+    public Result<?> register(@RequestBody UserRegisterDTO userRegisterDTO) {
         QueryWrapper<UserEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("username", userRegisterDTO.getUsername());
         UserEntity userEntity = userMapper.selectOne(wrapper);
@@ -48,7 +44,16 @@ public class CommonController extends BaseController {
             return ResultUtils.error(-1,"用户已经存在");
         }
         userRegisterDTO.setPassword(bCryptPasswordEncoder.encode(userRegisterDTO.getPassword()));
-        return ResultUtils.success(userMapper.insert(new UserEntity(userRegisterDTO)));
+        int insert = userMapper.insert(new UserEntity(userRegisterDTO));
+        if(insert > 0) {
+            UserEntity newUser = userMapper.selectOne(new QueryWrapper<UserEntity>().eq("username", userRegisterDTO.getUsername()));
+            String userId = newUser.getUserId();
+            RoleUserEntity roleUserEntity = new RoleUserEntity();
+            roleUserEntity.setUserId(userId);
+            roleUserEntity.setRoleId("1");
+            roleUserMapper.insert(roleUserEntity);
+        }
+        return ResultUtils.success(insert);
     }
     @ApiOperation(value = "获取用户信息")
     @RequestMapping("/common/getUserInfo")

@@ -19,7 +19,7 @@
     <select id="getUserWithRoleByUserId" resultMap="userinfo" parameterType="string">
         select t1.*from sale_user t1 WHERE t1.user_id=#{user_id}
     </select>
-    <select id="selectPageVo" resultType="com.dgut.vo.UserInfoVO">
+    <select id="selectPageVo" resultMap="userinfo">
         SELECT user_id,username FROM sale_user WHERE username like "%"#{username}"%"
     </select>
 
