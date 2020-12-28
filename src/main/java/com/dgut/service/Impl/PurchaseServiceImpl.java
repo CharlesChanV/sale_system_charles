@@ -192,8 +192,9 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         if(purchase.getDeliverStatus()==1) {
             throw new Exception("该清单已经发货，请勿重复操作");
         }
-        String addresseeUserId = purchase.getUserId();
-        LogisticsEntity logisticsEntity = this.handleLogisticsInfoNew(addresseeUserId, senderUserId);
+//        String addresseeUserId = purchase.getUserId();
+        Integer addresseeCustomerId = purchase.getCustomerId();
+        LogisticsEntity logisticsEntity = this.handleLogisticsInfoNew(addresseeCustomerId, senderUserId);
         int logistics_res = logisticsService.saveLogistics(logisticsEntity);
         if(logistics_res != 1) {
             throw new Exception("物流信息新增异常");
@@ -206,13 +207,13 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
 
     /**
      * 处理封装物流信息
-     * @param addresseeUserId
+     * @param addresseeCustomerId
      * @param senderUserId
      * @return
      * @throws Exception
      */
-    public LogisticsEntity handleLogisticsInfoNew(String addresseeUserId, String senderUserId) throws Exception {
-        CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("user_id", addresseeUserId));
+    public LogisticsEntity handleLogisticsInfoNew(Integer addresseeCustomerId, String senderUserId) throws Exception {
+        CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("customerId", addresseeCustomerId));
         if(addressee == null) {
             throw new Exception("收件人地址尚未完善");
         }

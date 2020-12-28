@@ -66,6 +66,6 @@ public interface PurchaseService extends IService<PurchaseEntity> {
      * @return
      * @throws Exception
      */
-    public LogisticsEntity handleLogisticsInfoNew(String addresseeUserId, String senderUserId) throws Exception;
+    public LogisticsEntity handleLogisticsInfoNew(Integer addresseeUserId, String senderUserId) throws Exception;
 
 }
