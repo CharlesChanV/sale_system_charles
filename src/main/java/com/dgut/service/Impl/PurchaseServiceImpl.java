@@ -213,7 +213,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
      * @throws Exception
      */
     public LogisticsEntity handleLogisticsInfoNew(Integer addresseeCustomerId, String senderUserId) throws Exception {
-        CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("customerId", addresseeCustomerId));
+        CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("customer_id", addresseeCustomerId));
         if(addressee == null) {
             throw new Exception("收件人地址尚未完善");
         }

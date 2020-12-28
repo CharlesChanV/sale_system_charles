@@ -32,11 +32,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @Api(value = "采购清单控制器", description = "采购清单控制器")
 public class PurchaseController {
-
     @Autowired
     PurchaseMapper purchaseMapper;
     @Autowired
@@ -45,13 +45,10 @@ public class PurchaseController {
     PurchaseService purchaseService;
     @Autowired
     PurchaseItemService purchaseItemService;
-
     @Autowired
     LogisticsService logisticsService;
-
     @Autowired
     ContractMapper contractMapper;
-
     @ApiOperation(value = "采购清单[单一数据]", httpMethod = "GET")
     @GetMapping("/purchase/{purchaseId}")
     public Result<?> getPurchase(@PathVariable("purchaseId") Integer purchaseId) {
@@ -65,14 +62,6 @@ public class PurchaseController {
         purchasePage = purchaseMapper.selectPageVo(purchasePage,purchaseDTO);
         return ResultUtils.pageResult(purchasePage);
     }
-
-//    @ApiOperation(value = "采购清单数据项[列表]", httpMethod = "GET")
-//    @GetMapping("/purchase/{purchaseId}/item")
-//    public PageResult getPurchaseItemList(@PathVariable("purchaseId") Integer purchaseId, PageDTO pageDTO) {
-//        IPage<PurchaseItemEntity> purchaseItemPage = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
-//        purchaseItemPage = purchaseMapper.selectItemByPurchaseIdPageVo(purchaseItemPage,purchaseId);
-//        return ResultUtils.pageResult(purchaseItemPage);
-//    }
 
     @ApiOperation(value = "采购清单信息修改")
     @PutMapping("/purchase")
@@ -114,9 +103,9 @@ public class PurchaseController {
     @ApiOperation(value = "支付采购清单")
     @PostMapping("/purchase/{purchaseId}/pay")
     public Result<?> payPurchase(@PathVariable("purchaseId") Integer purchaseId) throws Exception {
-        PurchaseEntity purchaseEntity = new PurchaseEntity();
-        purchaseEntity.setPurchaseId(purchaseId);
-        purchaseEntity.setPayStatus((byte)1);
+//        PurchaseEntity purchaseEntity = new PurchaseEntity();
+//        purchaseEntity.setPurchaseId(purchaseId);
+//        purchaseEntity.setPayStatus((byte)1);
         PurchaseEntity purchaseEntity1 = purchaseMapper.selectById(purchaseId);
         if(purchaseEntity1 == null) {
             throw new Exception("清单ID不存在");
@@ -124,8 +113,20 @@ public class PurchaseController {
         if(purchaseEntity1.getPayStatus() == 1) {
             throw new Exception("该清单已支付请勿重复操作");
         }
-        purchaseEntity.setVersion(purchaseEntity1.getVersion()-1);
-        int update_res = purchaseMapper.updateById(purchaseEntity);
+        List<PurchaseItemEntity> purchaseItemList = purchaseItemMapper.selectList(new QueryWrapper<PurchaseItemEntity>().eq("purchase_id", purchaseId));
+        double total_price = 0.00;
+        if(!purchaseItemList.isEmpty()) {
+            List<PurchaseItemEntity> purchaseItemListCollect = purchaseItemList.stream().map(item -> {
+                item.setPrice(item.getPerPrice() * item.getCount());
+                return item;
+            }).collect(Collectors.toList());
+            total_price = purchaseItemListCollect.stream().mapToDouble(PurchaseItemEntity::getPrice).sum();
+            purchaseItemMapper.updateListByPurchaseItemId(purchaseItemListCollect);
+        }
+        purchaseEntity1.setTotalPrice(total_price);
+        purchaseEntity1.setPayStatus((byte)1);
+        purchaseEntity1.setVersion(purchaseEntity1.getVersion()-1);
+        int update_res = purchaseMapper.updateById(purchaseEntity1);
 //        int update_res = purchaseService.updatePurchase(purchaseEntity);
 //        if(logisticsService.saveLogistics(logisticsEntity)!=1) {
 //            throw new Exception("新增异常");

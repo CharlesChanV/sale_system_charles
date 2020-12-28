@@ -32,10 +32,10 @@ public class PurchaseEntity extends BaseEntity {
     @ApiModelProperty("支付状态")
     private byte payStatus;
     @ApiModelProperty("总价")
-    private Integer totalPrice;
+    private Double totalPrice;
 //    @ApiModelProperty("发货状态")
     @ApiModelProperty(value = "发货状态", notes = "0未发货1已发货")
-    @Column(name="deliverStatus",columnDefinition="tinyint default 0 comment '0未发货1已发货'")
+    @Column(columnDefinition="tinyint default 0 comment '0未发货1已发货'")
     private Integer deliverStatus;
 //    @ApiModelProperty("创建时间")
 //    @CreationTimestamp

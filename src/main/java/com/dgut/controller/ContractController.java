@@ -34,7 +34,6 @@ public class ContractController {
     public Result<?> getContract(@PathVariable("contractId") Integer contractId) {
         return ResultUtils.success(contractMapper.selectById(contractId));
     }
-
     @ApiOperation(value = "合同[列表]", httpMethod = "GET")
     @GetMapping("/contract")
     public PageResult getContractList(ContractDTO contractDTO, PageDTO pageDTO) {
@@ -48,13 +47,11 @@ public class ContractController {
         contractPage = contractMapper.selectPage(contractPage, queryWrapper);
         return ResultUtils.pageResult(contractPage);
     }
-
     @ApiOperation(value = "合同添加[单一数据]", httpMethod = "POST")
     @PostMapping("/contract")
     public Result<?> saveContract(@RequestBody ContractEntity contractEntity) {
         return ResultUtils.success(contractService.saveContract(contractEntity));
     }
-
     @ApiOperation(value = "合同信息修改")
     @PutMapping("/contract")
     public Result<?> updateContract(ContractEntity contractEntity) throws Exception {
@@ -62,10 +59,13 @@ public class ContractController {
         if(contractEntity1 == null) {
             throw new Exception("查无此合同信息");
         }
+//        if(contractEntity1.getStatus() > 0 && contractEntity.getStatus() > 0) {
+        if(contractEntity1.getStatus() > 0) {
+            throw new Exception("当前状态不支持修改");
+        }
         contractEntity.setVersion(contractEntity1.getVersion()-1);
         return ResultUtils.success(contractMapper.updateById(contractEntity));
     }
-
     @ApiOperation(value = "合同信息删除")
     @PostMapping("/contract/{contractId}")
     public Result<?> deleteContract(@PathVariable("contractId") Integer contractId) throws Exception {

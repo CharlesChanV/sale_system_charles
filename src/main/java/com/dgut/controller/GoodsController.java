@@ -65,7 +65,4 @@ public class GoodsController {
     public Result<?> deleteGoods(@PathVariable("goodsId") Integer goodsId) {
         return ResultUtils.success(goodsMapper.deleteById(goodsId));
     }
-
-
-
 }

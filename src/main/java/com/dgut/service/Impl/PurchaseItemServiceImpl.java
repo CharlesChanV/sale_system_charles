@@ -177,7 +177,7 @@ public class PurchaseItemServiceImpl extends ServiceImpl<PurchaseItemMapper, Pur
                 goodsEntity.setStock(goodsEntity.getStock()-item.getCount());
                 goodsEntityList.add(goodsEntity);
                 goodsIdCountList.put(item.getGoodsId(), -item.getCount());
-//                item.setPrice(goodsEntity.getPerPrice() * item.getCount());
+                item.setPrice(goodsEntity.getPerPrice() * item.getCount());
             }else{
                 throw new RuntimeException("存在已下架的商品");
             }
