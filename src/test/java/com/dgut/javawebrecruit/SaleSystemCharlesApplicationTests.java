@@ -4,17 +4,13 @@ import com.dgut.entity.AdminEntity;
 import com.dgut.entity.UserEntity;
 import com.dgut.mapper.AdminMapper;
 import com.dgut.mapper.UserMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 //@RunWith(SpringRunner.class)
-@SpringBootTest
+//@SpringBootTest
 class SaleSystemCharlesApplicationTests {
 
     @Resource
@@ -22,6 +18,37 @@ class SaleSystemCharlesApplicationTests {
 
     @Resource
     private AdminMapper adminMapper;
+    @Test
+    public void ttt() {
+        int []a = {7,2,5,9,10,36,20,12,25,16};
+        this.quickSort(a, 0, a.length-1);
+
+        for(int i:a) {
+            System.out.println(i);
+        }
+    }
+
+
+    public void quickSort(int[] num, int left, int right) {
+        if(right>left) {
+            int temp = num[left];
+            int i = left; //从左到右进行查找时的“指针”，指示当前左位置
+            int j = right; //从右到左进行查找时的“指针”，指示当前右位置
+            while(j>i) {
+                while(i<j && temp < num[j]) j--;
+                num[i] = num[j];
+                while(i<j && num[i] <= temp) i++;
+                num[j] = num[i];
+            }
+            //将基准元素填入相应位置
+            num[i] = temp;
+            //此时的i即为基准元素的位置
+            //对基准元素的左边子区间进行相似的快速排序
+            quickSort(num,left,i-1);
+            //对基准元素的右边子区间进行相似的快速排序
+            quickSort(num,i+1,right);
+        }
+    }
 
     @Test
     void contextLoads() {

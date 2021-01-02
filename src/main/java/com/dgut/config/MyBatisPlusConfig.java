@@ -31,12 +31,7 @@ public class MyBatisPlusConfig {
     public PaginationInterceptor paginationInterceptor() {
         return new PaginationInterceptor();
     }
-
-//    @Bean
-//    public PaginationInterceptor paginationInterceptor() {
-//        return new PaginationInterceptor();
-//    }
-
+    // 注入配置
     @Bean
     public CustomizedSqlInjector customizedSqlInjector() {
         return new CustomizedSqlInjector();

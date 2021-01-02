@@ -10,6 +10,7 @@ import com.dgut.utils.SnowFlakeUtil;
 import com.dgut.vo.PurchaseWithItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,12 +47,13 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         String no = "purchase_" + SnowFlakeUtil.getId();
         purchaseEntity.setPurchaseNo(no);
         if(purchaseMapper.insert(purchaseEntity) != 1) {
-            throw new Exception("采购清单新增异常");
+            throw new RuntimeException("采购清单新增异常");
         }
         return purchaseMapper.selectOne(new QueryWrapper<PurchaseEntity>().eq("purchase_no", no));
     }
 
     @Override
+    @Transactional
     public int deletePurchaseByPurchaseId(Integer purchaseId) throws Exception {
         PurchaseEntity purchaseEntity = this.getPurchaseEntityById(purchaseId);
 //        Optional.ofNullable(purchaseEntity).ifPresentOrElse(purchaseEntity1 -> {
@@ -63,10 +65,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
 //            throw new Exception("查无此采购清单信息");
 //        }
         if(purchaseEntity.getDeliverStatus() == 1) {
-            throw new Exception("该清单已发货无法删除");
+            throw new RuntimeException("该清单已发货无法删除");
         }
         if(purchaseEntity.getPayStatus() == 1) {
-            throw new Exception("该清单已支付无法删除");
+            throw new RuntimeException("该清单已支付无法删除");
         }
 
         QueryWrapper<PurchaseItemEntity> queryWrapper = new QueryWrapper<>();
@@ -76,7 +78,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
             if(purchaseMapper.deleteById(purchaseEntity.getPurchaseId())>0) {
                 return 1;
             }
-            throw new Exception("删除清单数据异常异常");
+            throw new RuntimeException("删除清单数据异常异常");
         }
         Map<Integer, Integer> purchaseItemList = new HashMap<>();
         // 将根据purchase_id查询出来的PurchaseItemEntity转化为goods_id->count的键值对purchaseItemList
@@ -86,22 +88,22 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         }).collect(Collectors.toList());
         // 恢复合同-商品信息
         if(this.resetContractItemListByContractId(purchaseEntity.getContractId(),purchaseItemList)!=1){
-            throw new Exception("恢复合同-商品信息异常");
+            throw new RuntimeException("恢复合同-商品信息异常");
         }
 //        List<GoodsEntity> goods_id = baseMapper.selectList(Wrappers.<GoodsEntity>lambdaQuery().in("goods_id", goodIdsList));
         if(this.resetGoodsListByGoodsId(goodIdsList, purchaseItemList)!=1) {
-            throw new Exception("恢复商品列表货存异常");
+            throw new RuntimeException("恢复商品列表货存异常");
         }
 //        List<GoodsUpdateStockDTO> collect = purchaseItemEntities.stream().map(GoodsUpdateStockDTO::new).collect(Collectors.toList());
 //        Map<String, Object> map = new HashMap<>();
 //        map.put("purchase_id",purchaseId);
         if(purchaseItemMapper.delete(new QueryWrapper<PurchaseItemEntity>().eq("purchase_id",purchaseId))==0) {
-            throw new Exception("删除清单-商品表数据异常异常");
+            throw new RuntimeException("删除清单-商品表数据异常异常");
         }
         if(purchaseMapper.deleteById(purchaseEntity.getPurchaseId())>0) {
             return 1;
         }
-        throw new Exception("删除清单数据异常异常");
+        throw new RuntimeException("删除清单数据异常异常");
     }
     // 获取清单信息
     public PurchaseEntity getPurchaseEntityById(Integer id){
@@ -135,7 +137,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
 //            }
         }).collect(Collectors.toList());
         if(!lackGoodsIds.isEmpty()){
-            throw new Exception("存在商品货存不足，商品ID:"+lackGoodsIds.toString());
+            throw new RuntimeException("存在商品货存不足，商品ID:"+lackGoodsIds.toString());
         }
         return goodsService.updateGoodsList(updateGoodsList);
     }
@@ -145,7 +147,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         System.out.println(purchaseItemList);
         List<ContractItemEntity> contractItemListByContractId = contractItemService.getContractItemListByContractId(contractId);
         if(contractItemListByContractId.isEmpty()) {
-            throw new Exception("不存在该合同-商品信息");
+            throw new RuntimeException("不存在该合同-商品信息");
         }
         List<ContractItemEntity> updateContractItemList = new ArrayList<>();
         List<ContractItemEntity> collect = contractItemListByContractId.stream().map(item -> {
@@ -162,7 +164,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         }).collect(Collectors.toList());
         System.out.println(collect);
         if (updateContractItemList.isEmpty()) {
-            throw new Exception("无法恢复合同-商品信息");
+            throw new RuntimeException("无法恢复合同-商品信息");
         }
         return contractItemService.updateListByContractItemId(updateContractItemList);
     }
@@ -174,7 +176,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     public int updatePurchase(PurchaseEntity purchaseEntity) throws Exception {
         PurchaseEntity purchaseEntity1 = purchaseMapper.selectById(purchaseEntity.getPurchaseId());
         if(purchaseEntity1 == null) {
-            throw new Exception("采购清单不存在");
+            throw new RuntimeException("采购清单不存在");
         }
         purchaseEntity.setVersion(purchaseEntity1.getVersion()-1);
         int res = purchaseMapper.updateById(purchaseEntity);
@@ -184,20 +186,21 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
         return res;
     }
     // 采购清单发货
+    @Transactional
     public int deliverPurchase(Integer purchaseId, String senderUserId) throws Exception {
         PurchaseEntity purchase = this.getPurchaseEntityById(purchaseId);
         if(purchase.getPayStatus()!=1) {
-            throw new Exception("该清单未付款");
+            throw new RuntimeException("该清单未付款");
         }
         if(purchase.getDeliverStatus()==1) {
-            throw new Exception("该清单已经发货，请勿重复操作");
+            throw new RuntimeException("该清单已经发货，请勿重复操作");
         }
 //        String addresseeUserId = purchase.getUserId();
         Integer addresseeCustomerId = purchase.getCustomerId();
         LogisticsEntity logisticsEntity = this.handleLogisticsInfoNew(addresseeCustomerId, senderUserId);
         int logistics_res = logisticsService.saveLogistics(logisticsEntity);
         if(logistics_res != 1) {
-            throw new Exception("物流信息新增异常");
+            throw new RuntimeException("物流信息新增异常");
         }
         LogisticsEntity logisticsNew = logisticsService.getLogisticsByLogisticsNo(logisticsEntity.getLogisticsNo());
         purchase.setLogisticsId(logisticsNew.getLogisticsId());
@@ -215,11 +218,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     public LogisticsEntity handleLogisticsInfoNew(Integer addresseeCustomerId, String senderUserId) throws Exception {
         CustomerEntity addressee = customerMapper.selectOne(new QueryWrapper<CustomerEntity>().eq("customer_id", addresseeCustomerId));
         if(addressee == null) {
-            throw new Exception("收件人地址尚未完善");
+            throw new RuntimeException("收件人地址尚未完善");
         }
         AdminEntity sender = adminMapper.selectOne(new QueryWrapper<AdminEntity>().eq("user_id", senderUserId));
         if(sender == null) {
-            throw new Exception("寄件人地址尚未完善");
+            throw new RuntimeException("寄件人地址尚未完善");
         }
         LogisticsEntity logisticsEntity = new LogisticsEntity();
         logisticsEntity.setLogisticsNo("logistics_" + SnowFlakeUtil.getId());
@@ -237,11 +240,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, PurchaseEnt
     public LogisticsEntity handleLogisticsInfo(String addresseeUserId, String senderUserId) throws Exception {
         AddressBookEntity addresseeAddress = addressBookMapper.selectOne(new QueryWrapper<AddressBookEntity>().eq("user_id", addresseeUserId));
         if(addresseeAddress == null) {
-            throw new Exception("收件人地址尚未完善");
+            throw new RuntimeException("收件人地址尚未完善");
         }
         AddressBookEntity senderAddress = addressBookMapper.selectOne(new QueryWrapper<AddressBookEntity>().eq("user_id", senderUserId));
         if(senderAddress == null) {
-            throw new Exception("寄件人地址尚未完善");
+            throw new RuntimeException("寄件人地址尚未完善");
         }
         LogisticsEntity logisticsEntity = new LogisticsEntity();
         logisticsEntity.setLogisticsNo("logistics_" + SnowFlakeUtil.getId());

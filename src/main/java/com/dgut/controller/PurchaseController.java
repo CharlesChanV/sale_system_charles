@@ -27,6 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -94,24 +95,25 @@ public class PurchaseController {
         purchaseEntity.setContractId(contractId);
         purchaseEntity.setCustomerId(contractEntity.getCustomerId());
         purchaseEntity.setUserId((String) authentication.getPrincipal());
-        PurchaseEntity purchaseTarget = purchaseService.savePurchase(purchaseEntity);
+//        PurchaseEntity purchaseTarget = purchaseService.savePurchase(purchaseEntity);
         // 接收body中的purchaseItemList
         JSONObject jsonObject = JSONObject.parseObject(json);
         List<PurchaseItemEntity> purchaseItemList = JSON.parseArray(jsonObject.getString("purchaseItemList"), PurchaseItemEntity.class);
-        return ResultUtils.success(purchaseItemService.savePurchaseItemList(purchaseTarget.getPurchaseId(), purchaseItemList));
+        return ResultUtils.success(purchaseItemService.savePurchaseItemList(purchaseEntity, purchaseItemList));
     }
     @ApiOperation(value = "支付采购清单")
     @PostMapping("/purchase/{purchaseId}/pay")
+    @Transactional
     public Result<?> payPurchase(@PathVariable("purchaseId") Integer purchaseId) throws Exception {
 //        PurchaseEntity purchaseEntity = new PurchaseEntity();
 //        purchaseEntity.setPurchaseId(purchaseId);
 //        purchaseEntity.setPayStatus((byte)1);
         PurchaseEntity purchaseEntity1 = purchaseMapper.selectById(purchaseId);
         if(purchaseEntity1 == null) {
-            throw new Exception("清单ID不存在");
+            throw new RuntimeException("清单ID不存在");
         }
         if(purchaseEntity1.getPayStatus() == 1) {
-            throw new Exception("该清单已支付请勿重复操作");
+            throw new RuntimeException("该清单已支付请勿重复操作");
         }
         List<PurchaseItemEntity> purchaseItemList = purchaseItemMapper.selectList(new QueryWrapper<PurchaseItemEntity>().eq("purchase_id", purchaseId));
         double total_price = 0.00;
